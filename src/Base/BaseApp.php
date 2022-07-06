@@ -17,6 +17,9 @@ use ZnCore\Env\Helpers\EnvHelper;
 use ZnCore\EventDispatcher\Interfaces\EventDispatcherConfiguratorInterface;
 use ZnCore\EventDispatcher\Traits\EventDispatcherTrait;
 
+/**
+ * Абстрактный класс приложения
+ */
 abstract class BaseApp implements AppInterface
 {
 
@@ -62,7 +65,7 @@ abstract class BaseApp implements AppInterface
         $this->containerConfigurator = $containerConfigurator;
         $this->znCore = $znCore;
     }
-
+    
     public function init(): void
     {
         $this->dispatchEvent(AppEventEnum::BEFORE_INIT_ENV);
@@ -82,6 +85,9 @@ abstract class BaseApp implements AppInterface
         $this->dispatchEvent(AppEventEnum::AFTER_INIT_DISPATCHER);
     }
 
+    /**
+     * Инициализация окружения
+     */
     protected function initEnv(): void
     {
         DotEnv::init($_ENV['APP_MODE']);
@@ -90,16 +96,29 @@ abstract class BaseApp implements AppInterface
         EnvHelper::setErrorVisibleFromEnv();
     }
 
+    /**
+     * Инициализация DI-контейнера
+     */
     protected function initContainer(): void
     {
         $this->configContainer($this->containerConfigurator);
     }
 
+    /**
+     * Получить конфиг загрузчиков бандла
+     * @return array
+     */
     protected function bundleLoaders(): array
     {
         return include __DIR__ . '/../../../../znlib/components/src/DefaultApp/config/bundleLoaders.php';
     }
 
+
+    /**
+     * Создать загрузчик бандла
+     *
+     * @return BundleLoader
+     */
     protected function createBundleLoaderInstance(): BundleLoader
     {
         $bundleLoader = new BundleLoader($this->bundles(), $this->import());
@@ -112,23 +131,39 @@ abstract class BaseApp implements AppInterface
         return $bundleLoader;
     }
 
+    /**
+     * Загрузка бандлов
+     */
     protected function initBundles(): void
     {
         $bundleLoader = $this->createBundleLoaderInstance();
         $bundleLoader->loadMainConfig($this->appName());
     }
 
+    /**
+     * Инициализация диспетчера событий
+     */
     protected function initDispatcher(): void
     {
         $eventDispatcherConfigurator = $this->getContainer()->get(EventDispatcherConfiguratorInterface::class);
         $this->configDispatcher($eventDispatcherConfigurator);
     }
 
+    /**
+     * Конфигурация диспетчера событий
+     *
+     * @param EventDispatcherConfiguratorInterface $configurator
+     */
     protected function configDispatcher(EventDispatcherConfiguratorInterface $configurator): void
     {
 
     }
 
+    /**
+     * Опубликовать событие
+     * 
+     * @param string $eventName
+     */
     protected function dispatchEvent(string $eventName): void
     {
         $event = new Event();

@@ -2,6 +2,9 @@
 
 namespace ZnCore\App\Enums;
 
+/**
+ * Перечисление событий инициализации приложения
+ */
 class AppEventEnum
 {
 
