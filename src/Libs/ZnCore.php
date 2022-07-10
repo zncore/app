@@ -3,7 +3,6 @@
 namespace ZnCore\App\Libs;
 
 use Psr\Container\ContainerInterface;
-use ZnCore\App\Loaders\ConfigCollectionLoader;
 use ZnCore\ConfigManager\Interfaces\ConfigManagerInterface;
 use ZnCore\ConfigManager\Libs\ConfigManager;
 use ZnCore\Container\Helpers\ContainerHelper;
