@@ -30,6 +30,7 @@ abstract class BaseApp implements AppInterface
     private $znCore;
     protected $bundles = [];
     private $import = [];
+    private $bundleLoader;
 
     abstract public function appName(): string;
 
@@ -65,7 +66,7 @@ abstract class BaseApp implements AppInterface
         $this->containerConfigurator = $containerConfigurator;
         $this->znCore = $znCore;
     }
-    
+
     public function init(): void
     {
         $this->dispatchEvent(AppEventEnum::BEFORE_INIT_ENV);
@@ -116,19 +117,38 @@ abstract class BaseApp implements AppInterface
 
     /**
      * Создать загрузчик бандла
-     *
      * @return BundleLoader
      */
     protected function createBundleLoaderInstance(): BundleLoader
     {
-        $bundleLoader = new BundleLoader($this->bundles(), $this->import());
+        return new BundleLoader($this->bundles(), $this->import());
+    }
+
+    /**
+     * Конфигурироывть загрузчик бандла
+     * @param BundleLoader $bundleLoader
+     */
+    protected function configureBundleLoader(BundleLoader $bundleLoader): void
+    {
         $loaders = $this->bundleLoaders();
         if ($loaders) {
             foreach ($loaders as $loaderName => $loaderDefinition) {
-                $bundleLoader->addLoaderConfig($loaderName, $loaderDefinition);
+                $bundleLoader->registerLoader($loaderName, $loaderDefinition);
             }
         }
-        return $bundleLoader;
+    }
+
+    /**
+     * Получить объект загрузчика бандла
+     * @return BundleLoader
+     */
+    protected function getBundleLoader(): BundleLoader
+    {
+        if ($this->bundleLoader == null) {
+            $this->bundleLoader = $this->createBundleLoaderInstance();
+            $this->configureBundleLoader($this->bundleLoader);
+        }
+        return $this->bundleLoader;
     }
 
     /**
@@ -136,7 +156,7 @@ abstract class BaseApp implements AppInterface
      */
     protected function initBundles(): void
     {
-        $bundleLoader = $this->createBundleLoaderInstance();
+        $bundleLoader = $this->getBundleLoader();
         $bundleLoader->loadMainConfig($this->appName());
     }
 
@@ -161,7 +181,7 @@ abstract class BaseApp implements AppInterface
 
     /**
      * Опубликовать событие
-     * 
+     *
      * @param string $eventName
      */
     protected function dispatchEvent(string $eventName): void
