@@ -28,15 +28,6 @@ class EnvServerHelper
         return $isMatch ? $matches[1] : null;
     }
 
-    /*public static function redirectToShash(string $name) {
-        if($_SERVER['REQUEST_URI'] === '/' . $name) {
-            $r = new RedirectResponse('/' . $name . '/');
-            $r->send();
-            exit;
-            //dd($_SERVER['REQUEST_URI'], $name);
-        }
-    }*/
-
     public static function fixUri(string $name)
     {
         if (ltrim($_SERVER['REQUEST_URI'], '/') === $name) {
