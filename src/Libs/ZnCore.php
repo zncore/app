@@ -66,7 +66,7 @@ class ZnCore
             return $containerConfigurator;
         });
 
-        $entityManagerConfigCallback = require __DIR__ . '/../../../entity-manager/src/config/container.php';
+        $entityManagerConfigCallback = require __DIR__ . '/../../../../zndomain/entity-manager/src/config/container.php';
         call_user_func($entityManagerConfigCallback, $containerConfigurator);
 
         $eventDispatcherConfigCallback = require __DIR__ . '/../../../event-dispatcher/src/config/container.php';
