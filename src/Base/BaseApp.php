@@ -18,7 +18,15 @@ use ZnCore\EventDispatcher\Interfaces\EventDispatcherConfiguratorInterface;
 use ZnCore\EventDispatcher\Traits\EventDispatcherTrait;
 
 /**
- * Абстрактный класс приложения
+ * Абстрактный класс инициализатора приложения.
+ *
+ * Шаги инициализации:
+ *
+ *  - Инициализация окружения
+ *  - Инициализация DI-контейнера
+ *  - Загрузка бандлов
+ *  - Инициализация диспетчера событий
+ *
  */
 abstract class BaseApp implements AppInterface
 {
@@ -67,6 +75,9 @@ abstract class BaseApp implements AppInterface
         $this->znCore = $znCore;
     }
 
+    /**
+     * Инициализация приложения
+     */
     public function init(): void
     {
         $this->dispatchEvent(AppEventEnum::BEFORE_INIT_ENV);
@@ -99,10 +110,32 @@ abstract class BaseApp implements AppInterface
 
     /**
      * Инициализация DI-контейнера
+     *
+     * Объявляет только самые необходимые зависимости для запуска приложения.
      */
     protected function initContainer(): void
     {
         $this->configContainer($this->containerConfigurator);
+    }
+
+    /**
+     * Загрузка подкюченных бандлов.
+     */
+    protected function initBundles(): void
+    {
+        $bundleLoader = $this->getBundleLoader();
+        $bundleLoader->loadMainConfig($this->appName());
+    }
+
+    /**
+     * Инициализация диспетчера событий.
+     *
+     *
+     */
+    protected function initDispatcher(): void
+    {
+        $eventDispatcherConfigurator = $this->getContainer()->get(EventDispatcherConfiguratorInterface::class);
+        $this->configDispatcher($eventDispatcherConfigurator);
     }
 
     /**
@@ -113,7 +146,6 @@ abstract class BaseApp implements AppInterface
     {
         return include __DIR__ . '/../../../../znlib/components/src/DefaultApp/config/bundleLoaders.php';
     }
-
 
     /**
      * Создать загрузчик бандла
@@ -149,24 +181,6 @@ abstract class BaseApp implements AppInterface
             $this->configureBundleLoader($this->bundleLoader);
         }
         return $this->bundleLoader;
-    }
-
-    /**
-     * Загрузка бандлов
-     */
-    protected function initBundles(): void
-    {
-        $bundleLoader = $this->getBundleLoader();
-        $bundleLoader->loadMainConfig($this->appName());
-    }
-
-    /**
-     * Инициализация диспетчера событий
-     */
-    protected function initDispatcher(): void
-    {
-        $eventDispatcherConfigurator = $this->getContainer()->get(EventDispatcherConfiguratorInterface::class);
-        $this->configDispatcher($eventDispatcherConfigurator);
     }
 
     /**
